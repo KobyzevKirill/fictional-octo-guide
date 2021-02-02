@@ -1,13 +1,22 @@
 package ru.startandroid.practask;
 
-public class RecyclerItem {
+import com.google.gson.annotations.SerializedName;
+
+public class Article {
     private String title;
+
+    @SerializedName("summary")
     private String description;
 
-    public RecyclerItem(String title, String description) {
+    private String imageUrl;
+
+    public Article(String title, String description, String imageUrl) {
         this.title = title;
         this.description = description;
+        this.imageUrl = imageUrl;
     }
+
+    public String getImageUrl() { return imageUrl; }
 
     public String getTitle() {
         return title;
@@ -16,4 +25,5 @@ public class RecyclerItem {
     public String getDescription() {
         return description;
     }
+
 }

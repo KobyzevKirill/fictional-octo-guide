@@ -4,16 +4,26 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import ru.startandroid.practask.api.ClientAPI;
+import ru.startandroid.practask.api.InterfaceAPI;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = "MainActivity";
+
     private RecyclerView recyclerView;
-    private List<RecyclerItem> listItems;
     private MyAdapter adapter;
+    private InterfaceAPI interfaceAPI;
+    private Context context = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,12 +36,25 @@ public class MainActivity extends AppCompatActivity {
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-        listItems = new ArrayList<>();
-        for (int i = 0; i < 30; i++) {
-            listItems.add(new RecyclerItem("Title " + (i + 1), "Some description of item " + (i + 1)));
-        }
+        interfaceAPI = ClientAPI.getClient().create(InterfaceAPI.class);
 
-        adapter = new MyAdapter(listItems, this);
-        recyclerView.setAdapter(adapter);
+        Call<List<Article>> call = interfaceAPI.getArticles();
+        call.enqueue(new Callback<List<Article>>() {
+            @Override
+            public void onResponse(Call<List<Article>> call, Response<List<Article>> response) {
+                if (!response.isSuccessful()) {
+                    Log.e(TAG, "onBadResponse: " + response.code());
+                    return;
+                }
+                adapter = new MyAdapter(response.body(), context);
+                recyclerView.setAdapter(adapter);
+            }
+
+            @Override
+            public void onFailure(Call<List<Article>> call, Throwable t) {
+                Log.e(TAG, "onFailure: " + t.getLocalizedMessage());
+            }
+        });
+
     }
 }
